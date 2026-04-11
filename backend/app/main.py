@@ -1,6 +1,7 @@
+from datetime import datetime, timedelta
 from typing import List
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -8,14 +9,14 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal, engine, Base
 from app.models import Prediction
 from app.predictor import predict
-from app.schema import ApiSchema, PredictionResponse, PredictionOut
+from app.schema import ApiSchema, PredictionResponse, PredictionOut, TimelinePredictionResponse
 from app.seed import seed
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Heart Failure Predictor API",
-   description= """
+    description="""
     API para predição de risco em pacientes com insuficiência cardíaca.
 
     Funcionalidades:
@@ -25,6 +26,8 @@ app = FastAPI(
     """,
     version="1.0.0"
 )
+
+
 @app.on_event("startup")
 def startup_app():
     db = SessionLocal()
@@ -32,6 +35,7 @@ def startup_app():
         seed(db)
     finally:
         db.close()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -41,6 +45,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 def get_db():
     db = SessionLocal()
     try:
@@ -49,9 +54,29 @@ def get_db():
         db.close()
 
 
+@app.get("/infra/seed", tags=["Infra"])
+def seed_db():
+    db = SessionLocal()
+    try:
+        seed(db)
+        return {"message": "Database seeded"}
+    finally:
+        db.close()
+
+@app.get("/infra/reset/all", tags=["Infra"])
+def reset_db():
+    db = SessionLocal()
+    try:
+        Base.metadata.drop_all(bind=engine)
+        return {"message": "Database reset"}
+    finally:
+        db.close()
+
 @app.get("/", tags=["Health"], summary="Health check")
 def health():
     return {"message": "API online"}
+
+
 @app.post(
     "/predict",
     tags=["Predictions"],
@@ -65,7 +90,8 @@ def make_prediction(payload: ApiSchema, db: Session = Depends(get_db)):
     new_prediction = Prediction(
         **data,
         prediction=result["prediction"],
-        probability=result["probability"]
+        probability=result["probability"],
+        created_at=datetime.now()
     )
 
     db.add(new_prediction)
@@ -73,9 +99,10 @@ def make_prediction(payload: ApiSchema, db: Session = Depends(get_db)):
     db.refresh(new_prediction)
     return result
 
+
 @app.get(
     "/stats",
-tags=["Dashboard"],
+    tags=["Dashboard"],
     summary="Retorna estatísticas agregadas",
     description="Retorna dados consolidados para alimentar gráficos no front-end."
 )
@@ -113,15 +140,22 @@ def get_stats(db: Session = Depends(get_db)):
         ]
     }
 
+
 @app.get(
     "/predictions",
-tags=["Dashboard"],
+    tags=["Dashboard"],
     summary="Lista todas as predições",
     description="Retorna todas as predições armazenadas no banco de dados.",
     response_model=List[PredictionOut]
 )
-def list_predictions(db: Session = Depends(get_db)):
-    registers = db.query(Prediction).order_by(Prediction.created_at.desc()).all()
+def list_predictions(skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
+    registers = (db
+                 .query(Prediction)
+                 .order_by(Prediction.created_at.desc())
+                 .offset(skip)
+                 .limit(limit)
+                 .all()
+                 )
 
     resultado = []
     for r in registers:
@@ -132,3 +166,50 @@ def list_predictions(db: Session = Depends(get_db)):
         }
         resultado.append(item)
     return resultado
+
+
+@app.get(
+    "/stats/timeline",
+    tags=["Relatorios"],
+    summary="Retorna uma serie temporal de predições",
+    description="Retorna uma lista temporaria, contendo o dia e a quantidade positiva e negativa",
+    response_model=List[TimelinePredictionResponse]
+)
+def list_timeline(
+        days: int = Query(7),
+        db: Session = Depends(get_db)
+):
+    if days > 30:
+        raise HTTPException(status_code=422, detail="Periodo pesquisado não pode ser superior a 30 dias")
+
+    started_day = datetime.now() - timedelta(days=days)
+    rows = (
+        db.query(
+            func.date(Prediction.created_at).label("date"),
+            Prediction.prediction.label("prediction"),
+            func.count(Prediction.id).label("total")
+        )
+        .filter(Prediction.created_at >= started_day)
+        .group_by(func.date(Prediction.created_at), Prediction.prediction)
+        .order_by(func.date(Prediction.created_at))
+        .all()
+    )
+
+    timeline = {}
+
+    for date, prediction, total in rows:
+        date_str = str(date)
+
+        if date_str not in timeline:
+            timeline[date_str] = {
+                "date": date_str,
+                "positive": 0,
+                "negative": 0
+            }
+
+        if prediction == 1:
+            timeline[date_str]["positive"] += total
+        else:
+            timeline[date_str]["negative"] += total
+
+    return list(timeline.values())

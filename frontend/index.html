@@ -1,110 +1,95 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Predição de Insuficiência Cardíaca</title>
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+          crossorigin="anonymous"
+    >
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/form.css">
+    <link rel="stylesheet" href="css/theme.css">
 </head>
-<body class="bg-light">
-  <div class="container py-5">
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <div class="card shadow">
-          <div class="card-body">
-            <h1 class="h3 mb-4 text-center">Predição de Risco Cardíaco</h1>
+<body>
+<div id="app" class="container-fluid py-3">
+    <!--Navbar-->
+    <div class="row mb-3">
 
-            <form id="predictionForm" class="row g-3">
-              <div class="col-md-4">
-                <label class="form-label">Idade</label>
-                <input type="number" class="form-control" id="age" required>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Anemia</label>
-                <select class="form-select" id="anaemia" required>
-                  <option value="0">Não</option>
-                  <option value="1">Sim</option>
-                </select>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">CPK</label>
-                <input type="number" class="form-control" id="creatinine_phosphokinase" required>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Diabetes</label>
-                <select class="form-select" id="diabetes" required>
-                  <option value="0">Não</option>
-                  <option value="1">Sim</option>
-                </select>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Fração de ejeção</label>
-                <input type="number" class="form-control" id="ejection_fraction" required>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Pressão alta</label>
-                <select class="form-select" id="high_blood_pressure" required>
-                  <option value="0">Não</option>
-                  <option value="1">Sim</option>
-                </select>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Plaquetas</label>
-                <input type="number" class="form-control" id="platelets" required>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Creatinina sérica</label>
-                <input type="number" step="0.01" class="form-control" id="serum_creatinine" required>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Sódio sérico</label>
-                <input type="number" class="form-control" id="serum_sodium" required>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Sexo</label>
-                <select class="form-select" id="sex" required>
-                  <option value="0">Feminino</option>
-                  <option value="1">Masculino</option>
-                </select>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Fumante</label>
-                <select class="form-select" id="smoking" required>
-                  <option value="0">Não</option>
-                  <option value="1">Sim</option>
-                </select>
-              </div>
-
-              <div class="col-md-4">
-                <label class="form-label">Tempo (dias)</label>
-                <input type="number" class="form-control" id="time" required>
-              </div>
-
-              <div class="col-12 d-grid">
-                <button type="submit" class="btn btn-primary">Realizar predição</button>
-              </div>
-            </form>
-
-            <div id="result" class="alert mt-4 d-none"></div>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
+    <!--Fim Navbar-->
+    <!--main-->
+    <main class="main">
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title mb-0">
+                                Evolução das ultimas previsões
+                            </h5>
+                            <label for="timelineDays"></label>
+                            <select name="timelineDays" id="timelineDays" class="form-select w-auto">
+                                <option value="7" selected>Últimos 7 dias</option>
+                                <option value="15">Últimos 15 dias</option>
+                                <option value="30">Últimos 30 dias</option>
+                            </select>
+                        </div>
+                        <div style="height: 350px;">
+                            <canvas id="grafico-principal"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  <script src="script.js"></script>
+        <div class="row g-3">
+            <div class="col-12 col-lg-8">
+                <!-- tabela últimos 10 pacientes -->
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title mb-0">Últimos pacientes</h5>
+                            <button id="refreshTableBtn" class="btn btn-sm btn-outline-primary">
+                                Atualizar
+                            </button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="recentPatientsTable">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Idade</th>
+                                    <th>Resultado</th>
+                                    <th>Probabilidade</th>
+                                    <th>Data</th>
+                                </tr>
+                                </thead>
+                                <tbody id="recentPatientsTableBody">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Carregando...</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4">
+                <!-- gráfico secundário -->
+            </div>
+        </div>
+    </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+        crossorigin="anonymous">
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/script.js"></script>
+<script src="js/chart.js"></script>
+<script src="js/api.js"></script>
 </body>
 </html>

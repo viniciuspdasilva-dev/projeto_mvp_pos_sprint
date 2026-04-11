@@ -48,3 +48,8 @@ class PredictionOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+class TimelinePredictionResponse(BaseModel):
+    date: str
+    positive: int
+    negative: int

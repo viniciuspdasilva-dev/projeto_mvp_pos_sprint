@@ -21,8 +21,6 @@ class Prediction(Base):
     sex = Column(Integer, nullable=False)
     smoking = Column(Integer, nullable=False)
     time = Column(Integer, nullable=False)
-
     prediction = Column(Integer, nullable=False)
     probability = Column(Float, nullable=True)
-
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now())
