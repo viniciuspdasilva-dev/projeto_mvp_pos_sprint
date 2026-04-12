@@ -127,6 +127,8 @@ def get_stats(db: Session = Depends(get_db)):
         .all()
     )
 
+    avg_probability = db.query(func.avg(Prediction.probability)).scalar()
+
     return {
         "total_predictions": total,
         "predictions_by_class": [
@@ -137,7 +139,8 @@ def get_stats(db: Session = Depends(get_db)):
         ],
         "diabetes_by_class": [
             {"prediction": pred, "diabetes_count": int(count or 0)} for pred, count in diabetes_by_class
-        ]
+        ],
+        "average_probability": round(float(avg_probability), 2) if avg_probability is not None else 0
     }
 
 
@@ -148,7 +151,7 @@ def get_stats(db: Session = Depends(get_db)):
     description="Retorna todas as predições armazenadas no banco de dados.",
     response_model=List[PredictionOut]
 )
-def list_predictions(skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
+def list_predictions(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     registers = (db
                  .query(Prediction)
                  .order_by(Prediction.created_at.desc())

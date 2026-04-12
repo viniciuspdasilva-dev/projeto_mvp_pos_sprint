@@ -1,7 +1,29 @@
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Hello World!");
+    loadKPIs();
     loadChartPrincipal();
     loadTableResume();
+    loadRiskDistributionChart();
+
+    function setActiveNav() {
+        const currentPage = window.location.pathname.split("/").pop();
+
+        document.querySelectorAll(".nav-link").forEach(link => {
+            link.classList.remove("active");
+
+            if (link.getAttribute("href") === currentPage) {
+                link.classList.add("active");
+            }
+        });
+    }
+
+    document.getElementById("refreshDashboardBtn")?.addEventListener("click", () => {
+        loadKPIs();
+        loadChartPrincipal();
+        loadTableResume();
+        loadRiskDistributionChart()
+    });
+    document.addEventListener("DOMContentLoaded", setActiveNav);
 
     const timelineDaysSelect = document.getElementById("timelineDays");
 
@@ -23,27 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return date.toLocaleDateString("pt-BR");
     }
 
-    /*
-    * {
-    "id": 11,
-    "age": 46,
-    "anaemia": 0,
-    "creatinine_phosphokinase": 55,
-    "diabetes": 1,
-    "ejection_fraction": 37,
-    "high_blood_pressure": 1,
-    "platelets": 223684,
-    "serum_creatinine": 3.78,
-    "serum_sodium": 127,
-    "sex": 1,
-    "smoking": 0,
-    "time": 35,
-    "prediction": 1,
-    "probability": 76.88,
-    "created_at": "2026-04-10T22:47:59.676425",
-    "label": "alto risco"
-  },
-    * */
     function _renderRiskBadge(item) {
         const isHighRisk = item.prediction === 1;
         return `
