@@ -1,9 +1,9 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     console.log("Hello World!");
-    loadKPIs();
-    loadChartPrincipal();
-    loadTableResume();
-    loadRiskDistributionChart();
+    await loadKPIs();
+    await loadChartPrincipal();
+    await loadTableResume();
+    await loadRiskDistributionChart();
 
     function setActiveNav() {
         const currentPage = window.location.pathname.split("/").pop();

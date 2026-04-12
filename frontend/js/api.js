@@ -31,3 +31,17 @@ async function loadKPIs() {
         console.error("Erro ao carregar KPIs:", error);
     }
 }
+
+async function sendData(data) {
+    const response = await fetch(`${urlBase}/predict`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) {
+        throw new Error("Erro ao enviar dados");
+    }
+    return await response.json();
+}

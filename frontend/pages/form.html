@@ -1,10 +1,303 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Nova Predição - Heart Predictor</title>
+
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+    />
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .page-title {
+            font-weight: 700;
+        }
+
+        .section-card {
+            border: 0;
+            border-radius: 1rem;
+        }
+
+        .result-card {
+            min-height: 100%;
+        }
+
+        .risk-bar {
+            height: 12px;
+            border-radius: 999px;
+            background-color: #e9ecef;
+            overflow: hidden;
+        }
+
+        .risk-bar-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+    </style>
 </head>
 <body>
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold text-primary" href="../index.html">
+            🫀 Heart Predictor
+        </a>
 
+        <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="../index.html">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="form.html">Nova predição</a>
+                </li>
+               <!-- <li class="nav-item">
+                    <a class="nav-link disabled" href="history.html">Histórico</a>
+                </li>-->
+            </ul>
+
+            <div class="d-flex gap-2">
+                <a
+                        href="http://127.0.0.1:8000/docs"
+                        target="_blank"
+                        class="btn btn-outline-secondary btn-sm"
+                >
+                    Swagger
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="page-title mb-1">Nova predição</h2>
+            <p class="text-muted mb-0">
+                Informe os dados clínicos para que o modelo faça a classificação de risco.
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-xl-8">
+            <div class="card shadow-sm section-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <h5 class="card-title mb-0">Formulário do paciente</h5>
+
+                        <div class="d-flex gap-2">
+                            <button id="fillExampleBtn" type="button" class="btn btn-outline-primary btn-sm">
+                                Gerar exemplo
+                            </button>
+                            <button id="clearFormBtn" type="button" class="btn btn-outline-secondary btn-sm">
+                                Limpar
+                            </button>
+                        </div>
+                    </div>
+
+                    <form id="predictionForm" class="row g-3">
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <label for="age" class="form-label">Idade</label>
+                            <input type="number" class="form-control" id="age" min="1" max="120" required/>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <label for="anaemia" class="form-label">Anemia</label>
+                            <select id="anaemia" class="form-select" required>
+                                <option value="">Selecione</option>
+                                <option value="0">Não</option>
+                                <option value="1">Sim</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <label for="creatinine_phosphokinase" class="form-label">Creatinina fosfoquinase</label>
+                            <input type="number" class="form-control" id="creatinine_phosphokinase" min="0" required/>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <label for="diabetes" class="form-label">Diabetes</label>
+                            <select id="diabetes" class="form-select" required>
+                                <option value="">Selecione</option>
+                                <option value="0">Não</option>
+                                <option value="1">Sim</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <label for="ejection_fraction" class="form-label">Fração de ejeção</label>
+                            <input type="number" class="form-control" id="ejection_fraction" min="1" max="100"
+                                   required/>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <label for="high_blood_pressure" class="form-label">Pressão alta</label>
+                            <select id="high_blood_pressure" class="form-select" required>
+                                <option value="">Selecione</option>
+                                <option value="0">Não</option>
+                                <option value="1">Sim</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <label for="platelets" class="form-label">Plaquetas</label>
+                            <input type="number" class="form-control" id="platelets" min="1" step="0.01" required/>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <label for="serum_creatinine" class="form-label">Creatinina sérica</label>
+                            <input type="number" class="form-control" id="serum_creatinine" min="0" step="0.01"
+                                   required/>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <label for="serum_sodium" class="form-label">Sódio sérico</label>
+                            <input type="number" class="form-control" id="serum_sodium" min="0" required/>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <label for="sex" class="form-label">Sexo</label>
+                            <select id="sex" class="form-select" required>
+                                <option value="">Selecione</option>
+                                <option value="0">Feminino</option>
+                                <option value="1">Masculino</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <label for="smoking" class="form-label">Fumante</label>
+                            <select id="smoking" class="form-select" required>
+                                <option value="">Selecione</option>
+                                <option value="0">Não</option>
+                                <option value="1">Sim</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <label for="time" class="form-label">Tempo de acompanhamento</label>
+                            <input type="number" class="form-control" id="time" min="1" required/>
+                        </div>
+
+                        <div class="col-12 d-flex gap-2 flex-wrap mt-2">
+                            <button id="submitBtn" type="submit" class="btn btn-primary">
+                                Realizar predição
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="formMessage" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-4">
+            <div class="card shadow-sm section-card result-card">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-3">Resultado da predição</h5>
+                    <div id="emptyState" class="text-muted">
+                        Envie o formulário para visualizar o resultado da classificação.
+                    </div>
+
+                    <div id="loadingState" class="d-none text-center py-4">
+                        <div class="spinner-border text-primary mb-3" role="status"></div>
+                        <p class="mb-0 text-muted">Processando predição...</p>
+                    </div>
+
+                    <div id="resultContainer" class="d-none">
+                        <div class="mb-3">
+                            <span id="resultBadge" class="badge fs-6"></span>
+                        </div>
+
+                        <div class="text-center mb-4">
+                            <p class="text-muted mb-2">Score de risco</p>
+                            <h1 id="resultScore" class="display-4 fw-bold mb-1">0%</h1>
+                            <p id="resultLabel" class="fw-semibold mb-0"></p>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="fw-semibold">Probabilidade</span>
+                                <span id="resultProbability" class="fw-semibold">0%</span>
+                            </div>
+
+                            <div class="risk-bar">
+                                <div id="riskBarFill" class="risk-bar-fill"></div>
+                            </div>
+                        </div>
+
+                        <div id="resultAlert" class="alert mb-4"></div>
+
+                        <div class="border rounded-4 p-3 bg-light">
+                            <h6 class="fw-bold mb-3">Resumo clínico</h6>
+
+                            <div class="row g-2 small">
+                                <div class="col-6">
+                                    <span class="text-muted">Idade:</span>
+                                    <span id="summaryAge" class="fw-semibold"></span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted">Diabetes:</span>
+                                    <span id="summaryDiabetes" class="fw-semibold"></span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted">Pressão alta:</span>
+                                    <span id="summaryHbp" class="fw-semibold"></span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted">Fumante:</span>
+                                    <span id="summarySmoking" class="fw-semibold"></span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted">Fração de ejeção:</span>
+                                    <span id="summaryEjection" class="fw-semibold"></span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted">Creatinina:</span>
+                                    <span id="summaryCreatinine" class="fw-semibold"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <h6 class="fw-bold">Principais fatores identificados</h6>
+                        <ul id="insightsList" class="small mb-0"></ul>
+                    </div>
+
+                    <div class="mt-auto pt-3">
+                        <div class="alert alert-info mb-0 small">
+                            Cada envio realiza uma predição e salva o registro para uso no dashboard e no histórico.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/form.js"></script>
+<script src="../js/api.js"></script>
 </body>
 </html>
