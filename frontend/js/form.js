@@ -270,6 +270,8 @@ function clearForm() {
     emptyState.classList.remove("d-none");
     loadingState.classList.add("d-none");
     resultContainer.classList.add("d-none");
+    document.getElementById("insightsList").innerHTML = "";
+
 }
 
 function submitPrediction($e) {
